@@ -212,6 +212,8 @@
     const input = document.getElementById('referral-code-input');
     const loadBtn = document.getElementById('load-network-btn');
     const messageEl = document.getElementById('page-message');
+    const tabNetworkBtn = document.getElementById('tab-network');
+    const tabAnnouncementsBtn = document.getElementById('tab-announcements');
 
     loadBtn.addEventListener('click', () => {
       const code = input.value.trim();
@@ -221,6 +223,9 @@
       }
       loadNetwork(code);
     });
+
+    tabNetworkBtn?.addEventListener('click', () => switchTab('network'));
+    tabAnnouncementsBtn?.addEventListener('click', () => switchTab('announcements'));
 
     async function loadNetwork(referralCode) {
       resetView();
