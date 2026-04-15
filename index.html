@@ -1,1 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Network — Referral Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      color: #F3F4F6;
+      background: #090B14;
+      font-family: 'Inter', sans-serif;
+      --bg: #090B14;
+      --surface: #111427;
+      --surface2: #1C1F3A;
+      --border: #2E3151;
+      --text: #F3F4F6;
+      --muted: #94A3B8;
+      --green: #10B981;
+      --amber: #F59E0B;
+      --red: #EF4444;
+      --purple: #8B5CF6;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: radial-gradient(circle at top, rgba(139,92,246,0.12), transparent 35%), var(--bg); color: var(--text); }
+    a { color: var(--purple); text-decoration: none; }
+    button, input { font: inherit; }
+
+    .page-shell { max-width: 980px; margin: 0 auto; padding: 24px; }
+    header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 28px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-title { font-size: 26px; font-weight: 700; letter-spacing: -0.03em; }
+    .brand-subtitle { color: var(--muted); font-size: 14px; }
+
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 22px; padding: 24px; margin-bottom: 24px; }
+    .panel h2 { margin: 0 0 14px; font-size: 18px; font-weight: 700; }
+    .panel p { margin: 0; color: var(--muted); line-height: 1.7; }
+
+    .input-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; margin-top: 18px; }
+    .input-row input { width: 100%; border: 1px solid var(--border); border-radius: 14px; background: #0F1223; color: var(--text); padding: 14px 16px; }
+    .input-row button { background: var(--purple); border: none; color: #fff; border-radius: 14px; padding: 14px 20px; cursor: pointer; transition: transform 0.15s ease; }
+    .input-row button:hover { transform: translateY(-1px); }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-top: 20px; }
+    .stat-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 18px; padding: 18px; }
+    .stat-label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+    .stat-value { font-size: 24px; font-weight: 700; }
+    .stat-value strong { display: block; font-size: 14px; font-weight: 500; color: var(--muted); margin-top: 6px; }
+
+    .network-grid { display: grid; gap: 20px; }
+    .network-card { background: #10142C; border: 1px solid var(--border); border-radius: 20px; padding: 22px; }
+    .card-title { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 18px; font-size: 15px; font-weight: 700; color: var(--text); }
+    .card-title.small { font-size: 14px; font-weight: 600; color: var(--muted); }
+
+    .tab-bar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
+    .tab-button { appearance: none; border: 1px solid var(--border); background: var(--surface2); color: var(--text); border-radius: 14px; padding: 12px 18px; cursor: pointer; transition: all 0.15s ease; }
+    .tab-button.active { background: linear-gradient(135deg, #8B5CF6, #6366F1); border-color: transparent; color: #fff; }
+
+    .announcement-card { background: linear-gradient(180deg, rgba(16,185,129,0.08), rgba(15,23,42,0.95)); border: 1px solid rgba(16,185,129,0.18); border-radius: 22px; padding: 24px; }
+    .announcement-card h3 { margin: 0 0 12px; font-size: 18px; }
+    .announcement-card p { margin: 0 0 18px; color: var(--muted); line-height: 1.75; }
+    .announcement-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+    .announcement-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 16px; }
+    .announcement-item strong { display: block; margin-bottom: 6px; }
+
+    #updates-content { display: none; }
+    .network-row { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; display: grid; gap: 12px; }
+    .network-entry { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 14px; background: rgba(255,255,255,0.02); border-radius: 14px; }
+    .network-entry strong { font-size: 14px; }
+    .network-entry span { font-size: 13px; color: var(--muted); }
+
+    .highlight-card { background: linear-gradient(180deg, rgba(139,92,246,0.12), rgba(15,23,42,0.9)); border: 1px solid rgba(139,92,246,0.3); }
+    .highlight-card .network-entry { background: transparent; padding: 0; border-radius: 0; }
+
+    .badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+    .badge.green { background: rgba(16,185,129,0.14); color: #6EE7B7; }
+    .badge.yellow { background: rgba(245,158,11,0.14); color: #FACC15; }
+    .badge.red { background: rgba(239,68,68,0.14); color: #FCA5A5; }
+
+    .empty-state { text-align: center; color: var(--muted); padding: 42px 16px; border: 1px dashed rgba(255,255,255,0.1); border-radius: 18px; margin-top: 16px; }
+    .empty-state strong { color: var(--text); }
+
+    .section-collapsible { display: flex; justify-content: space-between; align-items: center; cursor: pointer; gap: 12px; }
+    .section-label { color: var(--muted); font-size: 13px; }
+    .toggle-icon { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 999px; background: rgba(255,255,255,0.04); color: var(--text); }
+
+    @media (max-width: 720px) {
+      .input-row { grid-template-columns: 1fr; }
+      .input-row button { width: 100%; }
+      .network-entry { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <header>
+      <div class="brand">
+        <div class="brand-title">My Network</div>
+        <div class="brand-subtitle">See your upline, downline, and earnings from your referral tree.</div>
+      </div>
+      <div class="brand-subtitle">Safe view only: no sensitive user or financial details shown.</div>
+    </header>
+
+    <div class="tab-bar">
+      <button class="tab-button active" id="tab-network" type="button" onclick="switchTab('network')">Network</button>
+      <button class="tab-button" id="tab-announcements" type="button" onclick="switchTab('announcements')">Announcements</button>
+    </div>
+
+    <div id="network-content">
+      <section class="panel">
+      <h2>Enter your username or referral code</h2>
+      <p>Use your account username or referral code to load your network structure. This page only displays name and status for your upline and referrals.</p>
+      <div class="input-row">
+        <input id="referral-code-input" type="text" placeholder="Username or referral code" autocomplete="off" />
+        <button id="load-network-btn">View Network</button>
+      </div>
+      <div id="page-message" class="empty-state" style="display:none;"></div>
+    </section>
+
+    <section class="stats-grid" id="summary-cards" style="display:none;">
+      <div class="stat-card">
+        <div class="stat-label">Total Direct Referrals</div>
+        <div class="stat-value" id="direct-count">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Network (Level 1 + 2)</div>
+        <div class="stat-value" id="network-count">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Estimated Monthly Earnings</div>
+        <div class="stat-value" id="estimated-earnings">Rp 0</div>
+      </div>
+    </section>
+
+    <section class="network-grid" id="network-view" style="display:none;">
+      <div class="network-card">
+        <div class="card-title"><span>↑ Your Upline</span><span class="section-label">Level +1 / +2</span></div>
+        <div id="upline-list" class="network-row"></div>
+      </div>
+
+      <div class="network-card highlight-card">
+        <div class="card-title"><span>→ You</span><span class="section-label">Current account</span></div>
+        <div id="current-user-card" class="network-row"></div>
+      </div>
+
+      <div class="network-card">
+        <div class="section-collapsible" onclick="toggleSection('downline-1-section')">
+          <div class="card-title"><span>↓ Downline Level 1</span><span class="section-label">Direct referrals</span></div>
+          <div class="toggle-icon">↓</div>
+        </div>
+        <div id="downline-1-section" class="network-row"></div>
+      </div>
+
+      <div class="network-card">
+        <div class="section-collapsible" onclick="toggleSection('downline-2-section')">
+          <div class="card-title"><span>↓ Downline Level 2</span><span class="section-label">Indirect referrals</span></div>
+          <div class="toggle-icon">↓</div>
+        </div>
+        <div id="downline-2-section" class="network-row"></div>
+      </div>
+    </section>
+  </div>
+
+  <section class="panel" id="updates-content">
+    <h2>Announcements</h2>
+    <p>Latest app update news and install guidance. Content is fetched from Firestore.</p>
+    <div class="announcement-card" id="announcement-container">
+      <h3 id="announcement-title-display">Loading announcement…</h3>
+      <p id="announcement-message-display">Please wait while we load the latest announcement.</p>
+      <div id="announcement-link-display" style="margin-top:16px"></div>
+      <div id="announcement-updated" style="margin-top:14px; color:var(--muted); font-size:13px"></div>
+    </div>
+  </section>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      query,
+      where,
+      getDocs,
+      getDoc,
+      doc,
+      limit
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey:            "AIzaSyCkkdzF9RLW4ME5O6Iei09bJc-u2m94Yz8",
+      authDomain:        "autoplaylicense.firebaseapp.com",
+      projectId:         "autoplaylicense",
+      storageBucket:     "autoplaylicense.firebasestorage.app",
+      messagingSenderId: "476022591079",
+      appId:             "1:476022591079:web:8ebdb4591c4a8810ccec2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const COLLECTION = 'licenses';
+    const announcementDoc = doc(db, 'app_config', 'announcement');
+    let allUsersCache = null;
+
+    const fieldPaths = {
+      friendName: ['friendName', 'friend_name'],
+      status: ['status'],
+      referralCode: ['referral', 'referral_code', 'referralCode']
+    };
+
+    const input = document.getElementById('referral-code-input');
+    const loadBtn = document.getElementById('load-network-btn');
+    const messageEl = document.getElementById('page-message');
+
+    loadBtn.addEventListener('click', () => {
+      const code = input.value.trim();
+      if (!code) {
+        showMessage('Please enter your username or referral code to continue.');
+        return;
+      }
+      loadNetwork(code);
+    });
+
+    async function loadNetwork(referralCode) {
+      resetView();
+      showMessage('Loading your network…', false);
+
+      try {
+        const current = await getCurrentUserByReferral(referralCode);
+        if (!current) {
+          showMessage('User not found. Enter your username or referral code exactly as registered.');
+          return;
+        }
+
+        const upline = await getMyUpline(current, 2);
+        const downline = await getMyDownline(current, 2);
+
+        renderSummary(downline.level1.length, downline.level2.length);
+        renderUpline(upline);
+        renderCurrentUser(current);
+        renderDownline(downline.level1, 'downline-1-section');
+        renderDownline(downline.level2, 'downline-2-section');
+
+        showMessage('', false);
+        document.getElementById('summary-cards').style.display = 'grid';
+        document.getElementById('network-view').style.display = 'grid';
+      } catch (error) {
+        showMessage('Unable to load network. ' + (error.message || 'Please try again later.'));
+        console.error(error);
+      }
+    }
+
+    async function getCurrentUserByReferral(code) {
+      const normalized = normalizeIdentifier(code);
+      if (!normalized) return null;
+
+      let user = await fetchUserByField(fieldPaths.friendName, code);
+      if (user) return user;
+      user = await fetchUserByField(fieldPaths.referralCode, code);
+      if (user) return user;
+
+      const allUsers = await fetchAllUsers();
+      return allUsers.find(u =>
+        normalizeIdentifier(u.friendName) === normalized ||
+        normalizeIdentifier(u.referral) === normalized
+      ) || null;
+    }
+
+    async function fetchUserByField(fields, value) {
+      for (const field of fields) {
+        const q = query(collection(db, COLLECTION), where(field, '==', value), limit(1));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          return mapUserDoc(snap.docs[0]);
+        }
+      }
+      return null;
+    }
+
+    async function getMyUpline(currentUser, maxLevel = 2) {
+      const result = [];
+      let parentReferral = currentUser.referral || '';
+
+      for (let level = 1; level <= maxLevel; level++) {
+        if (!parentReferral) break;
+        const parent = await fetchUserByField(fieldPaths.friendName, parentReferral);
+        if (!parent) break;
+        result.push(parent);
+        parentReferral = parent.referral || '';
+      }
+
+      return result;
+    }
+
+    async function getMyDownline(currentUser, maxLevel = 2) {
+      if (!currentUser || !currentUser.friendName) {
+        return { level1: [], level2: [] };
+      }
+
+      const level1 = await fetchUsersByReferralTo(currentUser.friendName);
+      if (maxLevel < 2 || level1.length === 0) {
+        return { level1, level2: [] };
+      }
+
+      const level1Names = level1.map(u => u.friendName).filter(Boolean);
+      const level2 = await fetchUsersByReferralToBatch(level1Names);
+      return { level1, level2 };
+    }
+
+    async function fetchUsersByReferralTo(referrerName) {
+      const usersById = new Map();
+      const normalizedSource = normalizeIdentifier(referrerName);
+
+      for (const field of fieldPaths.referralCode) {
+        const q = query(collection(db, COLLECTION), where(field, '==', referrerName));
+        const snap = await getDocs(q);
+        snap.forEach(docSnap => {
+          const user = mapUserDoc(docSnap);
+          usersById.set(user.id, user);
+        });
+      }
+
+      const allUsers = await fetchAllUsers();
+      allUsers.forEach(user => {
+        if (normalizeIdentifier(user.referral) === normalizedSource) {
+          usersById.set(user.id, user);
+        }
+      });
+
+      return Array.from(usersById.values());
+    }
+
+    async function fetchUsersByReferralToBatch(referrerNames) {
+      if (referrerNames.length === 0) return [];
+      const batches = [];
+      const namesCopy = [...referrerNames];
+      while (namesCopy.length) {
+        batches.push(namesCopy.splice(0, 10));
+      }
+
+      const usersById = new Map();
+      const normalizedSources = new Set(referrerNames.map(normalizeIdentifier));
+
+      for (const batch of batches) {
+        for (const field of fieldPaths.referralCode) {
+          const q = query(collection(db, COLLECTION), where(field, 'in', batch));
+          const snap = await getDocs(q);
+          snap.forEach(docSnap => {
+            const user = mapUserDoc(docSnap);
+            usersById.set(user.id, user);
+          });
+        }
+      }
+
+      const allUsers = await fetchAllUsers();
+      allUsers.forEach(user => {
+        if (normalizedSources.has(normalizeIdentifier(user.referral))) {
+          usersById.set(user.id, user);
+        }
+      });
+
+      return Array.from(usersById.values());
+    }
+
+    async function fetchAllUsers() {
+      if (allUsersCache) return allUsersCache;
+      const snap = await getDocs(collection(db, COLLECTION));
+      allUsersCache = snap.docs.map(mapUserDoc);
+      return allUsersCache;
+    }
+
+    function normalizeIdentifier(value) {
+      if (typeof value !== 'string') return '';
+      return value.trim().toLowerCase();
+    }
+
+    async function loadAnnouncement() {
+      const titleEl = document.getElementById('announcement-title-display');
+      const messageEl = document.getElementById('announcement-message-display');
+      const linkEl = document.getElementById('announcement-link-display');
+      const updatedEl = document.getElementById('announcement-updated');
+
+      try {
+        const snap = await getDoc(announcementDoc);
+        if (!snap.exists()) {
+          titleEl.textContent = 'No announcements yet.';
+          messageEl.textContent = 'The admin can publish app updates from the admin dashboard.';
+          linkEl.innerHTML = '';
+          updatedEl.textContent = '';
+          return;
+        }
+
+        const data = snap.data();
+        titleEl.textContent = data.title || 'App announcement';
+        messageEl.textContent = data.message || 'No announcement text has been provided.';
+        if (data.link) {
+          linkEl.innerHTML = `<a href="${escapeHtml(data.link)}" target="_blank" rel="noopener noreferrer">Open update link</a>`;
+        } else {
+          linkEl.innerHTML = '';
+        }
+        if (data.updatedAt && data.updatedAt.toDate) {
+          const updated = data.updatedAt.toDate();
+          updatedEl.textContent = `Last updated: ${updated.toLocaleDateString('id-ID')} ${updated.toLocaleTimeString('id-ID')}`;
+        } else {
+          updatedEl.textContent = '';
+        }
+      } catch (error) {
+        titleEl.textContent = 'Unable to load announcement.';
+        messageEl.textContent = error.message || 'Please try again later.';
+        linkEl.innerHTML = '';
+        updatedEl.textContent = '';
+        console.error(error);
+      }
+    }
+
+    function mapUserDoc(docSnap) {
+      const data = docSnap.data();
+      const trialStart = getField(data, ['trialStart']);
+      const subscribed = getField(data, ['subscribed']);
+      const expiryDate = getField(data, ['expiryDate']);
+      const explicitStatus = String(getField(data, fieldPaths.status) || '').trim().toLowerCase();
+
+      return {
+        id: docSnap.id,
+        friendName: String(getField(data, fieldPaths.friendName) || 'Anonymous').trim(),
+        status: deriveStatus(explicitStatus, trialStart, subscribed, expiryDate),
+        referral: String(getField(data, fieldPaths.referralCode) || '').trim(),
+        trialStart,
+        subscribed,
+        expiryDate
+      };
+    }
+
+    function getField(data, keys) {
+      return keys.map(key => data[key]).find(value => value !== undefined && value !== null);
+    }
+
+    function deriveStatus(explicitStatus, trialStart, subscribed, expiryDate) {
+      if (explicitStatus === 'subscribed' || explicitStatus === 'trial') {
+        return explicitStatus;
+      }
+
+      const isSubscribed = subscribed === true || String(subscribed).toLowerCase() === 'true';
+      const trialStartMs = trialStart?.toDate ? trialStart.toDate().getTime() : trialStart ? new Date(trialStart).getTime() : NaN;
+      const expiryMs = expiryDate?.toDate ? expiryDate.toDate().getTime() : expiryDate ? new Date(expiryDate).getTime() : NaN;
+      const now = Date.now();
+
+      if (isSubscribed) {
+        if (!Number.isNaN(expiryMs) && expiryMs > now) {
+          return 'subscribed';
+        }
+        return 'expired';
+      }
+
+      if (!Number.isNaN(trialStartMs) && trialStartMs + 3 * 24 * 60 * 60 * 1000 > now) {
+        return 'trial';
+      }
+      return 'expired';
+    }
+
+    function normalizeId(value) {
+      if (typeof value !== 'string') return value;
+      const parts = value.split('/');
+      return parts[parts.length - 1];
+    }
+
+    function statusBadge(status) {
+      const normalized = String(status || '').toLowerCase();
+      if (normalized === 'subscribed') return `<span class="badge green">Subscribed</span>`;
+      if (normalized === 'trial') return `<span class="badge yellow">Trial</span>`;
+      return `<span class="badge red">Expired</span>`;
+    }
+
+    function renderSummary(directCount, indirectCount) {
+      const total = directCount + indirectCount;
+      document.getElementById('direct-count').textContent = directCount;
+      document.getElementById('network-count').textContent = total;
+      document.getElementById('estimated-earnings').textContent = `Rp ${((directCount * 5000) + (indirectCount * 2000)).toLocaleString('id-ID')}`;
+    }
+
+    function renderUpline(upline) {
+      const container = document.getElementById('upline-list');
+      container.innerHTML = '';
+      if (upline.length === 0) {
+        container.innerHTML = `<div class="empty-state"><strong>No upline found.</strong><br>You're at the top of your current referral tree.</div>`;
+        return;
+      }
+      upline.forEach((user, index) => {
+        const level = upline.length - index;
+        const row = document.createElement('div');
+        row.className = 'network-entry';
+        row.innerHTML = `
+          <div>
+            <strong>Level +${level}: ${escapeHtml(user.friendName)}</strong>
+            <span>${statusText(user.status)}</span>
+          </div>
+          ${statusBadge(user.status)}
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function renderCurrentUser(user) {
+      const container = document.getElementById('current-user-card');
+      container.innerHTML = `
+        <div class="network-entry">
+          <div>
+            <strong>→ ${escapeHtml(user.friendName)}</strong>
+            <span>${statusText(user.status)}</span>
+          </div>
+          ${statusBadge(user.status)}
+        </div>
+      `;
+    }
+
+    function renderDownline(users, sectionId) {
+      const container = document.getElementById(sectionId);
+      container.innerHTML = '';
+      if (users.length === 0) {
+        container.innerHTML = `<div class="empty-state"><strong>No referrals found.</strong><br>Invite friends to grow your network.</div>`;
+        return;
+      }
+      users.forEach(user => {
+        const row = document.createElement('div');
+        row.className = 'network-entry';
+        row.innerHTML = `
+          <div>
+            <strong>${escapeHtml(user.friendName)}</strong>
+            <span>${statusText(user.status)}</span>
+          </div>
+          ${statusBadge(user.status)}
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function statusText(status) {
+      const normalized = String(status || '').toLowerCase();
+      if (normalized === 'subscribed') return 'Subscribed';
+      if (normalized === 'trial') return 'Trial';
+      return 'Expired';
+    }
+
+    function showMessage(text, isError = true) {
+      messageEl.textContent = text;
+      messageEl.style.display = text ? 'block' : 'none';
+      messageEl.style.borderColor = isError ? 'rgba(239,68,68,0.2)' : 'rgba(56,189,248,0.2)';
+      messageEl.style.color = isError ? '#FCA5A5' : '#7DD3FC';
+      messageEl.style.background = isError ? 'rgba(239,68,68,0.08)' : 'rgba(56,189,248,0.08)';
+    }
+
+    function resetView() {
+      document.getElementById('summary-cards').style.display = 'none';
+      document.getElementById('network-view').style.display = 'none';
+      document.getElementById('upline-list').innerHTML = '';
+      document.getElementById('current-user-card').innerHTML = '';
+      document.getElementById('downline-1-section').innerHTML = '';
+      document.getElementById('downline-2-section').innerHTML = '';
+    }
+
+    function switchTab(tab) {
+      const networkContent = document.getElementById('network-content');
+      const updatesContent = document.getElementById('updates-content');
+      const networkTab = document.getElementById('tab-network');
+      const announcementsTab = document.getElementById('tab-announcements');
+
+      const showNetwork = tab === 'network';
+      networkContent.style.display = showNetwork ? 'block' : 'none';
+      updatesContent.style.display = showNetwork ? 'none' : 'block';
+      networkTab.classList.toggle('active', showNetwork);
+      announcementsTab.classList.toggle('active', !showNetwork);
+    }
+
+    function toggleSection(sectionId) {
+      const section = document.getElementById(sectionId);
+      if (!section) return;
+      section.style.display = section.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    input.addEventListener('keydown', event => {
+      if (event.key === 'Enter') {
+        loadBtn.click();
+      }
+    });
+
+    loadAnnouncement();
+  </script>
+</body>
+</html>
 
