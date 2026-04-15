@@ -2,596 +2,1202 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Network — Referral Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Autoplay Admin — License Manager</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
-      color-scheme: dark;
-      color: #F3F4F6;
-      background: #090B14;
-      font-family: 'Inter', sans-serif;
-      --bg: #090B14;
-      --surface: #111427;
-      --surface2: #1C1F3A;
-      --border: #2E3151;
-      --text: #F3F4F6;
-      --muted: #94A3B8;
-      --green: #10B981;
-      --amber: #F59E0B;
-      --red: #EF4444;
-      --purple: #8B5CF6;
+      --bg:        #0D0D1A;
+      --surface:   #13132B;
+      --surface2:  #1A1A38;
+      --border:    #2D2D4E;
+      --purple:    #8B5CF6;
+      --purple-dk: #6D28D9;
+      --blue:      #2563EB;
+      --green:     #10B981;
+      --amber:     #F59E0B;
+      --red:       #EF4444;
+      --text:      #F3F4F6;
+      --muted:     #9CA3AF;
+      --dim:       #4B5563;
     }
 
-    * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; background: radial-gradient(circle at top, rgba(139,92,246,0.12), transparent 35%), var(--bg); color: var(--text); }
-    a { color: var(--purple); text-decoration: none; }
-    button, input { font: inherit; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
 
-    .page-shell { max-width: 980px; margin: 0 auto; padding: 24px; }
-    header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 28px; }
-    .brand { display: flex; align-items: center; gap: 12px; }
-    .brand-title { font-size: 26px; font-weight: 700; letter-spacing: -0.03em; }
-    .brand-subtitle { color: var(--muted); font-size: 14px; }
+    /* ─── Login Screen ─────────────────────────────────────────────── */
+    #login-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    #login-screen .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 48px 40px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+    .logo { font-size: 48px; margin-bottom: 16px; }
+    .login-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+    .login-sub { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
 
-    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 22px; padding: 24px; margin-bottom: 24px; }
-    .panel h2 { margin: 0 0 14px; font-size: 18px; font-weight: 700; }
-    .panel p { margin: 0; color: var(--muted); line-height: 1.7; }
+    .btn-google {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      padding: 14px;
+      background: #fff;
+      color: #1f1f1f;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-google:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+    .btn-google svg { width: 20px; height: 20px; }
 
-    .input-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; margin-top: 18px; }
-    .input-row input { width: 100%; border: 1px solid var(--border); border-radius: 14px; background: #0F1223; color: var(--text); padding: 14px 16px; }
-    .input-row button { background: var(--purple); border: none; color: #fff; border-radius: 14px; padding: 14px 20px; cursor: pointer; transition: transform 0.15s ease; }
-    .input-row button:hover { transform: translateY(-1px); }
+    /* ─── App Shell ────────────────────────────────────────────────── */
+    #app-screen { display: none; }
 
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-top: 20px; }
-    .stat-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 18px; padding: 18px; }
-    .stat-label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
-    .stat-value { font-size: 24px; font-weight: 700; }
-    .stat-value strong { display: block; font-size: 14px; font-weight: 500; color: var(--muted); margin-top: 6px; }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 32px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .header-logo { font-size: 22px; font-weight: 700; }
+    .header-logo span { color: var(--purple); }
+    .header-badge {
+      background: var(--purple-dk);
+      color: #fff;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    .header-status {
+      display: flex;
+      flex-direction: column;
+      text-align: right;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+    .header-status strong {
+      display: block;
+      font-size: 13px;
+      color: var(--text);
+      font-weight: 600;
+    }
+    #admin-email { display: none; }
+    .header-email {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .btn-logout {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-logout:hover { border-color: var(--red); color: var(--red); }
 
-    .network-grid { display: grid; gap: 20px; }
-    .network-card { background: #10142C; border: 1px solid var(--border); border-radius: 20px; padding: 22px; }
-    .card-title { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 18px; font-size: 15px; font-weight: 700; color: var(--text); }
-    .card-title.small { font-size: 14px; font-weight: 600; color: var(--muted); }
+    main { padding: 32px; max-width: 1200px; margin: 0 auto; }
 
-    .tab-bar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
-    .tab-button { appearance: none; border: 1px solid var(--border); background: var(--surface2); color: var(--text); border-radius: 14px; padding: 12px 18px; cursor: pointer; transition: all 0.15s ease; }
-    .tab-button.active { background: linear-gradient(135deg, #8B5CF6, #6366F1); border-color: transparent; color: #fff; }
+    /* Stats */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+    }
+    .stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+    .stat-value { font-size: 28px; font-weight: 700; }
+    .stat-card.green .stat-value { color: var(--green); }
+    .stat-card.amber .stat-value { color: var(--amber); }
+    .stat-card.red .stat-value   { color: var(--red); }
+    .stat-card.purple .stat-value { color: var(--purple); }
 
-    .announcement-card { background: linear-gradient(180deg, rgba(16,185,129,0.08), rgba(15,23,42,0.95)); border: 1px solid rgba(16,185,129,0.18); border-radius: 22px; padding: 24px; }
-    .announcement-card h3 { margin: 0 0 12px; font-size: 18px; }
-    .announcement-card p { margin: 0 0 18px; color: var(--muted); line-height: 1.75; }
-    .announcement-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
-    .announcement-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 16px; }
-    .announcement-item strong { display: block; margin-bottom: 6px; }
+    /* Controls */
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .controls h2 { flex: 1; font-size: 18px; font-weight: 600; }
+    .search-input {
+      flex: 1 1 240px;
+      min-width: 220px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+    .search-input::placeholder { color: var(--muted); }
 
-    #updates-content { display: none; }
-    .network-row { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; display: grid; gap: 12px; }
-    .network-entry { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 14px; background: rgba(255,255,255,0.02); border-radius: 14px; }
-    .network-entry strong { font-size: 14px; }
-    .network-entry span { font-size: 13px; color: var(--muted); }
+    .btn {
+      padding: 10px 18px;
+      border-radius: 10px;
+      border: none;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-primary { background: var(--purple); color: #fff; }
+    .btn-primary:hover { background: var(--purple-dk); transform: translateY(-1px); }
+    .btn-success { background: var(--green); color: #fff; }
+    .btn-success:hover { filter: brightness(1.1); }
+    .btn-danger  { background: var(--red); color: #fff; }
+    .btn-danger:hover { filter: brightness(1.1); }
+    .btn-referral { background: #262641; color: #fff; }
+    .btn-referral:hover { filter: brightness(1.05); }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-outline:hover { border-color: var(--purple); color: var(--purple); }
+    .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 7px; }
 
-    .highlight-card { background: linear-gradient(180deg, rgba(139,92,246,0.12), rgba(15,23,42,0.9)); border: 1px solid rgba(139,92,246,0.3); }
-    .highlight-card .network-entry { background: transparent; padding: 0; border-radius: 0; }
+    .referral-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+    .referral-card h4 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .referral-item {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+    .referral-item strong { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .referral-item span { display: block; font-size: 15px; font-weight: 600; color: var(--text); }
+    .referral-status { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+    .referral-status.green { background: rgba(16,185,129,0.14); color: #6ee7b7; }
+    .referral-status.amber { background: rgba(245,158,11,0.14); color: #facc15; }
+    .referral-status.red { background: rgba(239,68,68,0.14); color: #fca5a5; }
+    .referral-section { margin-top: 18px; }
+    .referral-section .section-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+    .referral-list { list-style: none; padding: 0; margin: 0; }
+    .referral-list li { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding: 10px 0; font-size: 14px; }
+    .referral-list li:last-child { border-bottom: none; }
+    .referral-list .item-meta { display: flex; align-items: center; gap: 10px; }
+    .referral-toggle { cursor: pointer; color: var(--purple); font-size: 12px; font-weight: 700; }
 
-    .badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; }
-    .badge.green { background: rgba(16,185,129,0.14); color: #6EE7B7; }
-    .badge.yellow { background: rgba(245,158,11,0.14); color: #FACC15; }
-    .badge.red { background: rgba(239,68,68,0.14); color: #FCA5A5; }
+    /* Table */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    table {
+      width: 100%;
+      min-width: 1040px;
+      border-collapse: collapse;
+    }
+    th, td {
+      white-space: nowrap;
+    }
+    th {
+      text-align: left;
+      padding: 14px 16px;
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+    td { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 14px; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--surface2); }
 
-    .empty-state { text-align: center; color: var(--muted); padding: 42px 16px; border: 1px dashed rgba(255,255,255,0.1); border-radius: 18px; margin-top: 16px; }
-    .empty-state strong { color: var(--text); }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .badge-green  { background: #064e3b; color: #34d399; }
+    .badge-amber  { background: #451a03; color: #fbbf24; }
+    .badge-red    { background: #450a0a; color: #f87171; }
+    .badge-dim    { background: #222; color: #888; }
 
-    .section-collapsible { display: flex; justify-content: space-between; align-items: center; cursor: pointer; gap: 12px; }
-    .section-label { color: var(--muted); font-size: 13px; }
-    .toggle-icon { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 999px; background: rgba(255,255,255,0.04); color: var(--text); }
+    .device-id { font-family: monospace; font-size: 11px; color: var(--dim); }
 
-    @media (max-width: 720px) {
-      .input-row { grid-template-columns: 1fr; }
-      .input-row button { width: 100%; }
-      .network-entry { flex-direction: column; align-items: flex-start; }
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      width: 100%;
+      max-width: 480px;
+    }
+    .modal h3 { font-size: 18px; font-weight: 600; margin-bottom: 20px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+    }
+    .form-group input:focus, .form-group textarea:focus {
+      outline: none;
+      border-color: var(--purple);
+    }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state p { font-size: 15px; }
+
+    /* Loading */
+    #table-loading {
+      text-align: center;
+      padding: 48px;
+      color: var(--muted);
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #18181b;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 20px;
+      font-size: 14px;
+      z-index: 200;
+      display: none;
+      animation: slideUp 0.2s ease;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    #toast.success { border-color: var(--green); color: var(--green); }
+    #toast.error   { border-color: var(--red);   color: var(--red); }
+
+    @media (max-width: 900px) {
+      .stats-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .stat-card { min-width: 0; }
+    }
+
+    @media (max-width: 640px) {
+      main { padding: 16px; }
+      header { padding: 12px 16px; }
+      .controls { flex-direction: column; align-items: stretch; }
+      .stats-row { grid-template-columns: 1fr; }
+      .stat-card { width: 100%; }
+      .btn { width: 100%; }
+      .controls button.btn-outline, .controls button.btn-primary { width: 100%; }
     }
   </style>
 </head>
 <body>
-  <div class="page-shell">
-    <header>
-      <div class="brand">
-        <div class="brand-title">My Network</div>
-        <div class="brand-subtitle">See your upline, downline, and earnings from your referral tree.</div>
-      </div>
-      <div class="brand-subtitle">Safe view only: no sensitive user or financial details shown.</div>
-    </header>
 
-    <div class="tab-bar">
-      <button class="tab-button active" id="tab-network" type="button" onclick="switchTab('network')">Network</button>
-      <button class="tab-button" id="tab-announcements" type="button" onclick="switchTab('announcements')">Announcements</button>
+<!-- ─── LOGIN SCREEN ──────────────────────────────────────────────── -->
+<div id="login-screen">
+  <div class="card">
+    <div class="logo">🔐</div>
+    <div class="login-title">Autoplay Admin</div>
+    <div class="login-sub">Sign in with your Google account to manage subscriptions</div>
+
+    <!-- file:// warning banner -->
+    <div id="file-warning" style="display:none; background:#451a03; border:1px solid #92400e;
+         color:#fbbf24; padding:12px 14px; border-radius:10px; font-size:13px;
+         margin-bottom:18px; text-align:left; line-height:1.6">
+      ⚠️ <strong>Open via localhost, not file://</strong><br>
+      Google Sign-in is blocked on <code>file://</code>.<br>
+      Double-click <strong>run_server.bat</strong> in the admin-web folder,<br>
+      then open <a href="http://localhost:8888" target="_blank"
+        style="color:#fbbf24">http://localhost:8888</a> in Chrome.
     </div>
 
-    <div id="network-content">
-      <section class="panel">
-      <h2>Enter your username or referral code</h2>
-      <p>Use your account username or referral code to load your network structure. This page only displays name and status for your upline and referrals.</p>
-      <div class="input-row">
-        <input id="referral-code-input" type="text" placeholder="Username or referral code" autocomplete="off" />
-        <button id="load-network-btn">View Network</button>
-      </div>
-      <div id="page-message" class="empty-state" style="display:none;"></div>
-    </section>
+    <button class="btn-google" id="btnGoogleLogin" onclick="signInWithGoogle()">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      Sign in with Google
+    </button>
 
-    <section class="stats-grid" id="summary-cards" style="display:none;">
-      <div class="stat-card">
-        <div class="stat-label">Total Direct Referrals</div>
-        <div class="stat-value" id="direct-count">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Total Network (Level 1 + 2)</div>
-        <div class="stat-value" id="network-count">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Estimated Monthly Earnings</div>
-        <div class="stat-value" id="estimated-earnings">Rp 0</div>
-      </div>
-    </section>
-
-    <section class="network-grid" id="network-view" style="display:none;">
-      <div class="network-card">
-        <div class="card-title"><span>↑ Your Upline</span><span class="section-label">Level +1 / +2</span></div>
-        <div id="upline-list" class="network-row"></div>
-      </div>
-
-      <div class="network-card highlight-card">
-        <div class="card-title"><span>→ You</span><span class="section-label">Current account</span></div>
-        <div id="current-user-card" class="network-row"></div>
-      </div>
-
-      <div class="network-card">
-        <div class="section-collapsible" onclick="toggleSection('downline-1-section')">
-          <div class="card-title"><span>↓ Downline Level 1</span><span class="section-label">Direct referrals</span></div>
-          <div class="toggle-icon">↓</div>
-        </div>
-        <div id="downline-1-section" class="network-row"></div>
-      </div>
-
-      <div class="network-card">
-        <div class="section-collapsible" onclick="toggleSection('downline-2-section')">
-          <div class="card-title"><span>↓ Downline Level 2</span><span class="section-label">Indirect referrals</span></div>
-          <div class="toggle-icon">↓</div>
-        </div>
-        <div id="downline-2-section" class="network-row"></div>
-      </div>
-    </section>
+    <!-- inline error message -->
+    <div id="login-error" style="display:none; margin-top:14px; color:#f87171;
+         font-size:13px; background:#450a0a; padding:10px 14px;
+         border-radius:8px; text-align:left"></div>
   </div>
+</div>
 
-  <section class="panel" id="updates-content">
-    <h2>Announcements</h2>
-    <p>Latest app update news and install guidance. Content is fetched from Firestore.</p>
-    <div class="announcement-card" id="announcement-container">
-      <h3 id="announcement-title-display">Loading announcement…</h3>
-      <p id="announcement-message-display">Please wait while we load the latest announcement.</p>
-      <div id="announcement-link-display" style="margin-top:16px"></div>
-      <div id="announcement-updated" style="margin-top:14px; color:var(--muted); font-size:13px"></div>
+<!-- ─── APP SCREEN ────────────────────────────────────────────────── -->
+<div id="app-screen">
+  <header>
+    <div class="header-left">
+      <div class="header-logo">Auto<span>play</span></div>
+      <div class="header-badge">ADMIN</div>
     </div>
-  </section>
+    <div class="header-right">
+      <div class="header-status">
+        <strong id="login-status">Not signed in</strong>
+        <span id="admin-email" class="header-email"></span>
+      </div>
+      <button class="btn-logout" onclick="signOut()">Sign Out</button>
+    </div>
+  </header>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import {
-      getFirestore,
-      collection,
-      query,
-      where,
-      getDocs,
-      getDoc,
-      doc,
-      limit
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  <main>
+    <!-- Stats Row -->
+    <div class="stats-row">
+      <div class="stat-card green">
+        <div class="stat-label">Subscribed</div>
+        <div class="stat-value" id="stat-subscribed">0</div>
+      </div>
+      <div class="stat-card amber">
+        <div class="stat-label">In Trial</div>
+        <div class="stat-value" id="stat-trial">0</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-label">Expired</div>
+        <div class="stat-value" id="stat-expired">0</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-label">Total Users</div>
+        <div class="stat-value" id="stat-total">0</div>
+      </div>
+    </div>
 
-    const firebaseConfig = {
-      apiKey:            "AIzaSyCkkdzF9RLW4ME5O6Iei09bJc-u2m94Yz8",
-      authDomain:        "autoplaylicense.firebaseapp.com",
-      projectId:         "autoplaylicense",
-      storageBucket:     "autoplaylicense.firebasestorage.app",
-      messagingSenderId: "476022591079",
-      appId:             "1:476022591079:web:8ebdb4591c4a8810ccec2"
-    };
+    <!-- Controls -->
+    <div class="controls">
+      <h2>Users</h2>
+      <input type="text" id="user-search" class="search-input" placeholder="Search by name, referral, or device..." oninput="renderTable()" />
+      <button class="btn btn-outline" onclick="refreshData()">🔄 Refresh</button>
+      <button class="btn btn-primary" onclick="openAddModal()">+ Add Device</button>
+    </div>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const COLLECTION = 'licenses';
-    const announcementDoc = doc(db, 'app_config', 'announcement');
-    let allUsersCache = null;
+    <section class="panel" id="announcement-editor">
+      <h2>App Announcement</h2>
+      <p>Write an announcement that will appear on the user-facing referral page.</p>
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" id="announcement-title" placeholder="e.g. App update available" />
+      </div>
+      <div class="form-group">
+        <label>Message</label>
+        <textarea id="announcement-message" rows="4" placeholder="Write the announcement text here..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Link (optional)</label>
+        <input type="text" id="announcement-link" placeholder="https://example.com/download" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="loadAnnouncement()">Reload</button>
+        <button class="btn btn-primary" onclick="saveAnnouncement()">Save Announcement</button>
+      </div>
+      <div id="announcement-status" style="margin-top:12px; color:var(--muted);"></div>
+    </section>
 
-    const fieldPaths = {
-      friendName: ['friendName', 'friend_name'],
-      status: ['status'],
-      referralCode: ['referral', 'referral_code', 'referralCode']
-    };
+    <!-- Table -->
+    <div class="table-wrap">
+      <div id="table-loading">Loading users...</div>
+      <table id="users-table" style="display:none">
+        <thead>
+          <tr>
+            <th>Friend Name</th>
+            <th>Device ID</th>
+            <th>Bank Name</th>
+            <th>Bank Account</th>
+            <th>Referral</th>
+            <th>Trial Start</th>
+            <th>Days Left</th>
+            <th>Status</th>
+            <th>Last Seen</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="users-tbody"></tbody>
+      </table>
+      <div id="empty-state" class="empty-state" style="display:none">
+        <div class="icon">📱</div>
+        <p>No users yet. Add the device here before the first app launch so the friend name is set immediately.</p>
+      </div>
+    </div>
+  </main>
+</div>
 
-    const input = document.getElementById('referral-code-input');
-    const loadBtn = document.getElementById('load-network-btn');
-    const messageEl = document.getElementById('page-message');
+<!-- ─── EDIT MODAL ────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal">
+    <h3>✏️ Edit User</h3>
+    <input type="hidden" id="edit-deviceId" />
+    <div class="form-group">
+      <label>Friend Name</label>
+      <input type="text" id="edit-friendName" placeholder="e.g. John" />
+    </div>
+    <div class="form-group">
+      <label>Bank Name</label>
+      <input type="text" id="edit-bankName" placeholder="e.g. BCA" />
+    </div>
+    <div class="form-group">
+      <label>Bank Account</label>
+      <input type="text" id="edit-bankAccount" placeholder="e.g. 1234567890" />
+    </div>
+    <div class="form-group">
+      <label>Subscription Status</label>
+      <select id="edit-subscribed">
+        <option value="false">❌ Not Subscribed</option>
+        <option value="true">✅ Subscribed</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Subscription Expiry Date (optional)</label>
+      <input type="date" id="edit-expiryDate" />
+    </div>
+    <div class="form-group">
+      <label>Referral (optional)</label>
+      <input type="text" id="edit-referral" placeholder="Referral username" />
+    </div>
+    <div class="form-group">
+      <label>Notes (private)</label>
+      <textarea id="edit-notes" rows="2" placeholder="e.g. Paid via transfer on 12 April"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-edit')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
 
-    loadBtn.addEventListener('click', () => {
-      const code = input.value.trim();
-      if (!code) {
-        showMessage('Please enter your username or referral code to continue.');
+<!-- ─── ADD MODAL ─────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-add">
+  <div class="modal">
+    <h3>📱 Register Device Before First Launch</h3>
+    <div class="form-group">
+      <label>Device ID (Android ID)</label>
+      <input type="text" id="add-deviceId" placeholder="e.g. abc123def456..." />
+    </div>
+    <div class="form-group">
+      <label>Friend Name (unique, required)</label>
+      <input type="text" id="add-friendName" placeholder="e.g. Budi" />
+    </div>
+    <div class="form-group">
+      <label>Bank Name</label>
+      <input type="text" id="add-bankName" placeholder="e.g. BCA" />
+    </div>
+    <div class="form-group">
+      <label>Bank Account</label>
+      <input type="text" id="add-bankAccount" placeholder="e.g. 1234567890" />
+    </div>
+    <div class="form-group">
+      <label>Referral (optional)</label>
+      <input type="text" id="add-referral" placeholder="Referral username" />
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <textarea id="add-notes" rows="2" placeholder="Optional notes..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-add')">Cancel</button>
+      <button class="btn btn-primary" onclick="addDevice()">Add Device</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── REFERRAL MODAL ─────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-referral">
+  <div class="modal">
+    <h3>🔗 Referral Structure</h3>
+    <div class="referral-card">
+      <div class="referral-item">
+        <strong>Current User</strong>
+        <span id="referral-current-name">-</span>
+      </div>
+      <div class="referral-item" style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+        <strong style="margin:0">Total Downline</strong>
+        <span id="referral-total-count">0</span>
+      </div>
+      <div class="referral-item" style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+        <strong style="margin:0">Estimated Monthly Income</strong>
+        <span id="referral-income">Rp 0</span>
+      </div>
+    </div>
+
+    <div class="referral-section">
+      <div class="section-title"><span>↑ Upline</span><span class="referral-toggle" onclick="toggleSection('referral-upline-body')">Toggle</span></div>
+      <div id="referral-upline-body">
+        <div id="referral-up-line"></div>
+      </div>
+    </div>
+
+    <div class="referral-section">
+      <div class="section-title"><span>↓ Downline Level 1</span><span class="referral-toggle" onclick="toggleSection('referral-downline-1-body')">Toggle</span></div>
+      <div id="referral-downline-1-body">
+        <ul id="referral-downline-1" class="referral-list"></ul>
+      </div>
+    </div>
+
+    <div class="referral-section">
+      <div class="section-title"><span>↓ Downline Level 2</span><span class="referral-toggle" onclick="toggleSection('referral-downline-2-body')">Toggle</span></div>
+      <div id="referral-downline-2-body">
+        <ul id="referral-downline-2" class="referral-list"></ul>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-referral')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── TOAST ─────────────────────────────────────────────────────── -->
+<div id="toast"></div>
+
+<!-- ─── FIREBASE SDK ──────────────────────────────────────────────── -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    onAuthStateChanged,
+    signOut as fbSignOut
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore,
+    collection,
+    getDocs,
+    doc,
+    setDoc,
+    getDoc,
+    updateDoc,
+    deleteDoc,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  // ── Detect file:// protocol and warn user ───────────────────────
+  if (location.protocol === 'file:') {
+    document.getElementById('file-warning').style.display = 'block';
+    document.getElementById('btnGoogleLogin').disabled = true;
+    document.getElementById('btnGoogleLogin').style.opacity = '0.5';
+    document.getElementById('btnGoogleLogin').style.cursor = 'not-allowed';
+  }
+
+  // ── Firebase Config ─────────────────────────────────────────────
+  const firebaseConfig = {
+    apiKey:            "AIzaSyCkkdzF9RLW4ME5O6Iei09bJc-u2m94Yz8",
+    authDomain:        "autoplaylicense.firebaseapp.com",
+    projectId:         "autoplaylicense",
+    storageBucket:     "autoplaylicense.firebasestorage.app",
+    messagingSenderId: "476022591079",
+    appId:             "1:476022591079:web:8ebdb459a1c4a8810ccec2"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+  const announcementDocRef = doc(db, 'app_config', 'announcement');
+
+  const AUTHORIZED_ADMIN_EMAILS = [
+    'yendry.mikael@gmail.com'
+  ];
+  const AUTHORIZED_ADMIN_UIDS = [
+    // Optional fallback: add Firebase UID(s) for stronger protection.
+    // 'abcd1234efgh5678ijkl9012mnop3456'
+  ];
+
+  let allUsers = [];
+
+  function isAuthorizedUser(user) {
+    if (!user) return false;
+    const email = String(user.email || '').toLowerCase();
+    const uid = String(user.uid || '');
+    return AUTHORIZED_ADMIN_EMAILS.includes(email) || AUTHORIZED_ADMIN_UIDS.includes(uid);
+  }
+
+  function setLoginStatus(text, subtext = '', color = 'var(--muted)') {
+    const statusEl = document.getElementById('login-status');
+    const emailEl = document.getElementById('admin-email');
+    if (statusEl) {
+      statusEl.textContent = text;
+      statusEl.style.color = color;
+    }
+    if (emailEl) {
+      emailEl.textContent = subtext;
+      emailEl.style.display = subtext ? 'block' : 'none';
+    }
+  }
+
+  function showUnauthorizedMessage() {
+    const errEl = document.getElementById('login-error');
+    errEl.textContent = 'Access denied. This admin page is restricted to authorized users only.';
+    errEl.style.display = 'block';
+  }
+
+  // ── Auth State ───────────────────────────────────────────────────
+  onAuthStateChanged(auth, user => {
+    const loginScreen = document.getElementById('login-screen');
+    const appScreen = document.getElementById('app-screen');
+    const errEl = document.getElementById('login-error');
+
+    if (user) {
+      if (!isAuthorizedUser(user)) {
+        showUnauthorizedMessage();
+        setLoginStatus('Unauthorized account', user.email || '', 'var(--red)');
+        fbSignOut(auth);
+        loginScreen.style.display = 'flex';
+        appScreen.style.display = 'none';
         return;
       }
-      loadNetwork(code);
-    });
 
-    async function loadNetwork(referralCode) {
-      resetView();
-      showMessage('Loading your network…', false);
+      errEl.style.display = 'none';
+      loginScreen.style.display = 'none';
+      appScreen.style.display = 'block';
+      setLoginStatus('Signed in', user.email || '', 'var(--green)');
+      loadUsers();
+    } else {
+      errEl.style.display = 'none';
+      loginScreen.style.display = 'flex';
+      appScreen.style.display = 'none';
+      setLoginStatus('Not signed in', '', 'var(--muted)');
+    }
+  });
 
-      try {
-        const current = await getCurrentUserByReferral(referralCode);
-        if (!current) {
-          showMessage('User not found. Enter your username or referral code exactly as registered.');
-          return;
-        }
-
-        const upline = await getMyUpline(current, 2);
-        const downline = await getMyDownline(current, 2);
-
-        renderSummary(downline.level1.length, downline.level2.length);
-        renderUpline(upline);
-        renderCurrentUser(current);
-        renderDownline(downline.level1, 'downline-1-section');
-        renderDownline(downline.level2, 'downline-2-section');
-
-        showMessage('', false);
-        document.getElementById('summary-cards').style.display = 'grid';
-        document.getElementById('network-view').style.display = 'grid';
-      } catch (error) {
-        showMessage('Unable to load network. ' + (error.message || 'Please try again later.'));
-        console.error(error);
+  // ── Sign In ──────────────────────────────────────────────────────
+  window.signInWithGoogle = async () => {
+    const errEl = document.getElementById('login-error');
+    errEl.style.display = 'none';
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (e) {
+      let msg = e.message;
+      if (e.code === 'auth/unauthorized-domain') {
+        msg = '❌ Domain not authorized.\nGo to Firebase Console → Authentication → Settings → Authorized Domains → Add "localhost".';
+      } else if (e.code === 'auth/popup-blocked') {
+        msg = '❌ Popup was blocked. Allow popups for this site in your browser settings.';
+      } else if (e.code === 'auth/popup-closed-by-user') {
+        msg = 'Sign-in cancelled.';
       }
+      errEl.textContent = msg;
+      errEl.style.display = 'block';
+    }
+  };
+
+  window.signOut = async () => {
+    await fbSignOut(auth);
+  };
+
+  // ── Load Users ───────────────────────────────────────────────────
+  window.loadUsers = window.refreshData = async () => {
+    document.getElementById('table-loading').style.display = 'block';
+    document.getElementById('users-table').style.display = 'none';
+    document.getElementById('empty-state').style.display = 'none';
+
+    try {
+      const snap = await getDocs(collection(db, 'licenses'));
+      allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderTable();
+      await loadAnnouncement();
+    } catch (e) {
+      showToast('Error loading users: ' + e.message, 'error');
+    }
+  };
+
+  function renderTable() {
+    const tbody = document.getElementById('users-tbody');
+    document.getElementById('table-loading').style.display = 'none';
+
+    const searchValue = document.getElementById('user-search')?.value.trim().toLowerCase() || '';
+    const usersToShow = searchValue
+      ? allUsers.filter(user => {
+          const friendName = String(user.friendName || '').toLowerCase();
+          const referral = String(user.referral || '').toLowerCase();
+          const deviceId = String(user.deviceId || user.id || '').toLowerCase();
+          const notes = String(user.notes || '').toLowerCase();
+          return friendName.includes(searchValue)
+            || referral.includes(searchValue)
+            || deviceId.includes(searchValue)
+            || notes.includes(searchValue);
+        })
+      : allUsers;
+
+    if (usersToShow.length === 0) {
+      document.getElementById('empty-state').style.display = 'block';
+      updateStats(usersToShow);
+      document.getElementById('users-table').style.display = 'none';
+      return;
     }
 
-    async function getCurrentUserByReferral(code) {
-      const normalized = normalizeIdentifier(code);
-      if (!normalized) return null;
+    document.getElementById('empty-state').style.display = 'none';
+    document.getElementById('users-table').style.display = 'table';
+    tbody.innerHTML = '';
+    updateStats(usersToShow);
 
-      let user = await fetchUserByField(fieldPaths.friendName, code);
-      if (user) return user;
-      user = await fetchUserByField(fieldPaths.referralCode, code);
-      if (user) return user;
+    usersToShow.forEach(user => {
+      const trialStart = user.trialStart?.toDate ? user.trialStart.toDate() : new Date(user.trialStart || Date.now());
+      const lastSeen   = user.lastSeen?.toDate   ? user.lastSeen.toDate()   : null;
+      const expiryDate = user.expiryDate?.toDate  ? user.expiryDate.toDate() : null;
 
-      const allUsers = await fetchAllUsers();
-      return allUsers.find(u =>
-        normalizeIdentifier(u.friendName) === normalized ||
-        normalizeIdentifier(u.referral) === normalized
-      ) || null;
-    }
+      const now = new Date();
+      const trialEndMs  = trialStart.getTime() + 3 * 24 * 60 * 60 * 1000;
+      const msLeft      = trialEndMs - now.getTime();
+      const daysLeft    = Math.max(0, Math.ceil(msLeft / 86400000));
+      const trialActive = msLeft > 0;
+      const isActiveSubscription = user.subscribed && expiryDate && expiryDate > now;
+      const isExpiredSubscription = user.subscribed && (!expiryDate || expiryDate <= now);
 
-    async function fetchUserByField(fields, value) {
-      for (const field of fields) {
-        const q = query(collection(db, COLLECTION), where(field, '==', value), limit(1));
-        const snap = await getDocs(q);
-        if (!snap.empty) {
-          return mapUserDoc(snap.docs[0]);
-        }
-      }
-      return null;
-    }
-
-    async function getMyUpline(currentUser, maxLevel = 2) {
-      const result = [];
-      let parentReferral = currentUser.referral || '';
-
-      for (let level = 1; level <= maxLevel; level++) {
-        if (!parentReferral) break;
-        const parent = await fetchUserByField(fieldPaths.friendName, parentReferral);
-        if (!parent) break;
-        result.push(parent);
-        parentReferral = parent.referral || '';
-      }
-
-      return result;
-    }
-
-    async function getMyDownline(currentUser, maxLevel = 2) {
-      if (!currentUser || !currentUser.friendName) {
-        return { level1: [], level2: [] };
-      }
-
-      const level1 = await fetchUsersByReferralTo(currentUser.friendName);
-      if (maxLevel < 2 || level1.length === 0) {
-        return { level1, level2: [] };
-      }
-
-      const level1Names = level1.map(u => u.friendName).filter(Boolean);
-      const level2 = await fetchUsersByReferralToBatch(level1Names);
-      return { level1, level2 };
-    }
-
-    async function fetchUsersByReferralTo(referrerName) {
-      const usersById = new Map();
-      const normalizedSource = normalizeIdentifier(referrerName);
-
-      for (const field of fieldPaths.referralCode) {
-        const q = query(collection(db, COLLECTION), where(field, '==', referrerName));
-        const snap = await getDocs(q);
-        snap.forEach(docSnap => {
-          const user = mapUserDoc(docSnap);
-          usersById.set(user.id, user);
-        });
-      }
-
-      const allUsers = await fetchAllUsers();
-      allUsers.forEach(user => {
-        if (normalizeIdentifier(user.referral) === normalizedSource) {
-          usersById.set(user.id, user);
-        }
-      });
-
-      return Array.from(usersById.values());
-    }
-
-    async function fetchUsersByReferralToBatch(referrerNames) {
-      if (referrerNames.length === 0) return [];
-      const batches = [];
-      const namesCopy = [...referrerNames];
-      while (namesCopy.length) {
-        batches.push(namesCopy.splice(0, 10));
+      let badge = '';
+      let daysText = '—';
+      if (isActiveSubscription) {
+        const expiryMs = expiryDate.getTime() - now.getTime();
+        const expiryDays = Math.max(0, Math.ceil(expiryMs / 86400000));
+        daysText = `${expiryDays}d`;
+        badge = '<span class="badge badge-green">✅ Subscribed</span>';
+      } else if (isExpiredSubscription) {
+        daysText = '<span style="color:var(--red)">Expired</span>';
+        badge = '<span class="badge badge-red">⚠️ Sub Expired</span>';
+      } else if (trialActive) {
+        daysText = `${daysLeft}d`;
+        badge = '<span class="badge badge-amber">⏳ Trial</span>';
+      } else {
+        daysText = '<span style="color:var(--red)">Expired</span>';
+        badge = '<span class="badge badge-red">🔴 Expired</span>';
       }
 
-      const usersById = new Map();
-      const normalizedSources = new Set(referrerNames.map(normalizeIdentifier));
-
-      for (const batch of batches) {
-        for (const field of fieldPaths.referralCode) {
-          const q = query(collection(db, COLLECTION), where(field, 'in', batch));
-          const snap = await getDocs(q);
-          snap.forEach(docSnap => {
-            const user = mapUserDoc(docSnap);
-            usersById.set(user.id, user);
-          });
-        }
-      }
-
-      const allUsers = await fetchAllUsers();
-      allUsers.forEach(user => {
-        if (normalizedSources.has(normalizeIdentifier(user.referral))) {
-          usersById.set(user.id, user);
-        }
-      });
-
-      return Array.from(usersById.values());
-    }
-
-    async function fetchAllUsers() {
-      if (allUsersCache) return allUsersCache;
-      const snap = await getDocs(collection(db, COLLECTION));
-      allUsersCache = snap.docs.map(mapUserDoc);
-      return allUsersCache;
-    }
-
-    function normalizeIdentifier(value) {
-      if (typeof value !== 'string') return '';
-      return value.trim().toLowerCase();
-    }
-
-    async function loadAnnouncement() {
-      const titleEl = document.getElementById('announcement-title-display');
-      const messageEl = document.getElementById('announcement-message-display');
-      const linkEl = document.getElementById('announcement-link-display');
-      const updatedEl = document.getElementById('announcement-updated');
-
-      try {
-        const snap = await getDoc(announcementDoc);
-        if (!snap.exists()) {
-          titleEl.textContent = 'No announcements yet.';
-          messageEl.textContent = 'The admin can publish app updates from the admin dashboard.';
-          linkEl.innerHTML = '';
-          updatedEl.textContent = '';
-          return;
-        }
-
-        const data = snap.data();
-        titleEl.textContent = data.title || 'App announcement';
-        messageEl.textContent = data.message || 'No announcement text has been provided.';
-        if (data.link) {
-          linkEl.innerHTML = `<a href="${escapeHtml(data.link)}" target="_blank" rel="noopener noreferrer">Open update link</a>`;
-        } else {
-          linkEl.innerHTML = '';
-        }
-        if (data.updatedAt && data.updatedAt.toDate) {
-          const updated = data.updatedAt.toDate();
-          updatedEl.textContent = `Last updated: ${updated.toLocaleDateString('id-ID')} ${updated.toLocaleTimeString('id-ID')}`;
-        } else {
-          updatedEl.textContent = '';
-        }
-      } catch (error) {
-        titleEl.textContent = 'Unable to load announcement.';
-        messageEl.textContent = error.message || 'Please try again later.';
-        linkEl.innerHTML = '';
-        updatedEl.textContent = '';
-        console.error(error);
-      }
-    }
-
-    function mapUserDoc(docSnap) {
-      const data = docSnap.data();
-      const trialStart = getField(data, ['trialStart']);
-      const subscribed = getField(data, ['subscribed']);
-      const expiryDate = getField(data, ['expiryDate']);
-      const explicitStatus = String(getField(data, fieldPaths.status) || '').trim().toLowerCase();
-
-      return {
-        id: docSnap.id,
-        friendName: String(getField(data, fieldPaths.friendName) || 'Anonymous').trim(),
-        status: deriveStatus(explicitStatus, trialStart, subscribed, expiryDate),
-        referral: String(getField(data, fieldPaths.referralCode) || '').trim(),
-        trialStart,
-        subscribed,
-        expiryDate
-      };
-    }
-
-    function getField(data, keys) {
-      return keys.map(key => data[key]).find(value => value !== undefined && value !== null);
-    }
-
-    function deriveStatus(explicitStatus, trialStart, subscribed, expiryDate) {
-      if (explicitStatus === 'subscribed' || explicitStatus === 'trial') {
-        return explicitStatus;
-      }
-
-      const isSubscribed = subscribed === true || String(subscribed).toLowerCase() === 'true';
-      const trialStartMs = trialStart?.toDate ? trialStart.toDate().getTime() : trialStart ? new Date(trialStart).getTime() : NaN;
-      const expiryMs = expiryDate?.toDate ? expiryDate.toDate().getTime() : expiryDate ? new Date(expiryDate).getTime() : NaN;
-      const now = Date.now();
-
-      if (isSubscribed) {
-        if (!Number.isNaN(expiryMs) && expiryMs > now) {
-          return 'subscribed';
-        }
-        return 'expired';
-      }
-
-      if (!Number.isNaN(trialStartMs) && trialStartMs + 3 * 24 * 60 * 60 * 1000 > now) {
-        return 'trial';
-      }
-      return 'expired';
-    }
-
-    function normalizeId(value) {
-      if (typeof value !== 'string') return value;
-      const parts = value.split('/');
-      return parts[parts.length - 1];
-    }
-
-    function statusBadge(status) {
-      const normalized = String(status || '').toLowerCase();
-      if (normalized === 'subscribed') return `<span class="badge green">Subscribed</span>`;
-      if (normalized === 'trial') return `<span class="badge yellow">Trial</span>`;
-      return `<span class="badge red">Expired</span>`;
-    }
-
-    function renderSummary(directCount, indirectCount) {
-      const total = directCount + indirectCount;
-      document.getElementById('direct-count').textContent = directCount;
-      document.getElementById('network-count').textContent = total;
-      document.getElementById('estimated-earnings').textContent = `Rp ${((directCount * 5000) + (indirectCount * 2000)).toLocaleString('id-ID')}`;
-    }
-
-    function renderUpline(upline) {
-      const container = document.getElementById('upline-list');
-      container.innerHTML = '';
-      if (upline.length === 0) {
-        container.innerHTML = `<div class="empty-state"><strong>No upline found.</strong><br>You're at the top of your current referral tree.</div>`;
-        return;
-      }
-      upline.forEach((user, index) => {
-        const level = upline.length - index;
-        const row = document.createElement('div');
-        row.className = 'network-entry';
-        row.innerHTML = `
-          <div>
-            <strong>Level +${level}: ${escapeHtml(user.friendName)}</strong>
-            <span>${statusText(user.status)}</span>
-          </div>
-          ${statusBadge(user.status)}
-        `;
-        container.appendChild(row);
-      });
-    }
-
-    function renderCurrentUser(user) {
-      const container = document.getElementById('current-user-card');
-      container.innerHTML = `
-        <div class="network-entry">
-          <div>
-            <strong>→ ${escapeHtml(user.friendName)}</strong>
-            <span>${statusText(user.status)}</span>
-          </div>
-          ${statusBadge(user.status)}
-        </div>
+      const friendName = getDisplayFriendName(user);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${escHtml(friendName)}</strong>
+          ${user.notes ? `<br><small style="color:var(--muted)">${escHtml(user.notes)}</small>` : ''}
+        </td>
+        <td><span class="device-id">${escHtml(user.deviceId || user.id)}</span></td>
+        <td>${escHtml(user.bankName || '')}</td>
+        <td>${escHtml(user.bankAccount || '')}</td>
+        <td>${escHtml(user.referral || '')}</td>
+        <td>${trialStart.toLocaleDateString('id-ID')}</td>
+        <td>${daysText}</td>
+        <td>${badge}</td>
+        <td>${lastSeen ? lastSeen.toLocaleDateString('id-ID') : '—'}</td>
+        <td>
+          <button class="btn btn-referral btn-sm" onclick="openReferralModal('${user.id}')">Referral</button>
+          <button class="btn btn-outline btn-sm" onclick="openEditModal('${user.id}')">✏️ Edit</button>
+          ${isActiveSubscription
+            ? `<button class="btn btn-danger btn-sm" style="margin-left:6px" onclick="revokeSubscription('${user.id}')">Revoke</button>`
+            : `<button class="btn btn-success btn-sm" style="margin-left:6px" onclick="activateSubscription('${user.id}')">✅ Activate</button>`
+          }
+          <button class="btn btn-danger btn-sm" style="margin-left:6px;background:transparent;border:1px solid var(--red)" onclick="deleteUser('${user.id}')">🗑️</button>
+        </td>
       `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function updateStats(users) {
+    const subscribed = users.filter(u => u.subscribed).length;
+    const trial = users.filter(u => {
+      if (u.subscribed) return false;
+      const ts = u.trialStart?.toDate ? u.trialStart.toDate() : new Date(u.trialStart || Date.now());
+      return (ts.getTime() + 3 * 86400000) > Date.now();
+    }).length;
+    const expired = users.length - subscribed - trial;
+    document.getElementById('stat-subscribed').textContent = subscribed;
+    document.getElementById('stat-trial').textContent = trial;
+    document.getElementById('stat-expired').textContent = Math.max(0, expired);
+    document.getElementById('stat-total').textContent = users.length;
+  }
+
+  function normalizeFriendName(name) {
+    return String(name || '').trim().toLowerCase();
+  }
+
+  function isDuplicateFriendName(name, excludeId = null) {
+    const normalized = normalizeFriendName(name);
+    if (!normalized) return false;
+    return allUsers.some(u => u.id !== excludeId && normalizeFriendName(u.friendName) === normalized);
+  }
+
+  function getDisplayFriendName(user) {
+    const rawName = String(user.friendName || '').trim();
+    if (!rawName || rawName.toLowerCase() === 'new user') {
+      const deviceId = String(user.deviceId || user.id || 'unknown');
+      const suffix = deviceId.slice(-6);
+      return `New Device${suffix ? ` (${suffix})` : ''}`;
+    }
+    return rawName;
+  }
+
+  // ── Quick Activate / Revoke ──────────────────────────────────────
+  window.activateSubscription = async (deviceId) => {
+    if (!confirm('Activate subscription for this user?')) return;
+    const expiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    try {
+      await updateDoc(doc(db, 'licenses', deviceId), { subscribed: true, expiryDate: expiry });
+      showToast('✅ Subscription activated for 30 days!', 'success');
+      loadUsers();
+    } catch (e) { showToast('Error: ' + e.message, 'error'); }
+  };
+
+  window.revokeSubscription = async (deviceId) => {
+    if (!confirm('Revoke this subscription?')) return;
+    try {
+      await updateDoc(doc(db, 'licenses', deviceId), { subscribed: false, expiryDate: null });
+      showToast('Subscription revoked.', 'success');
+      loadUsers();
+    } catch (e) { showToast('Error: ' + e.message, 'error'); }
+  };
+
+  window.deleteUser = async (deviceId) => {
+    if (!confirm('Delete this user record permanently?')) return;
+    try {
+      await deleteDoc(doc(db, 'licenses', deviceId));
+      showToast('User deleted.', 'success');
+      loadUsers();
+    } catch (e) { showToast('Error: ' + e.message, 'error'); }
+  };
+
+  // ── Edit Modal ───────────────────────────────────────────────────
+  window.openEditModal = (deviceId) => {
+    const user = allUsers.find(u => u.id === deviceId);
+    if (!user) return;
+    document.getElementById('edit-deviceId').value    = deviceId;
+    document.getElementById('edit-friendName').value  = user.friendName || '';
+    document.getElementById('edit-bankName').value    = user.bankName || '';
+    document.getElementById('edit-bankAccount').value = user.bankAccount || '';
+    document.getElementById('edit-referral').value    = user.referral || '';
+    document.getElementById('edit-subscribed').value  = user.subscribed ? 'true' : 'false';
+    document.getElementById('edit-notes').value       = user.notes || '';
+    const expiry = user.expiryDate?.toDate ? user.expiryDate.toDate() : null;
+    document.getElementById('edit-expiryDate').value  = expiry ? expiry.toISOString().substring(0, 10) : '';
+    openModal('modal-edit');
+  };
+
+  window.saveEdit = async () => {
+    const deviceId   = document.getElementById('edit-deviceId').value;
+    const friendName = document.getElementById('edit-friendName').value.trim();
+    const bankName   = document.getElementById('edit-bankName').value.trim();
+    const bankAccount = document.getElementById('edit-bankAccount').value.trim();
+    const referral   = document.getElementById('edit-referral').value.trim();
+    const subscribed = document.getElementById('edit-subscribed').value === 'true';
+    const notes      = document.getElementById('edit-notes').value.trim();
+    const expiryStr  = document.getElementById('edit-expiryDate').value;
+    const expiryDate = expiryStr ? new Date(expiryStr) : null;
+
+    if (!friendName) {
+      showToast('Friend Name is required.', 'error');
+      return;
+    }
+    if (isDuplicateFriendName(friendName, deviceId)) {
+      showToast('Friend Name already exists. Please choose a different name.', 'error');
+      return;
     }
 
-    function renderDownline(users, sectionId) {
-      const container = document.getElementById(sectionId);
-      container.innerHTML = '';
-      if (users.length === 0) {
-        container.innerHTML = `<div class="empty-state"><strong>No referrals found.</strong><br>Invite friends to grow your network.</div>`;
+    try {
+      await updateDoc(doc(db, 'licenses', deviceId), {
+        friendName, bankName, bankAccount, referral, subscribed, notes, expiryDate: expiryDate ?? null
+      });
+      showToast('✅ Saved!', 'success');
+      closeModal('modal-edit');
+      loadUsers();
+    } catch (e) { showToast('Error: ' + e.message, 'error'); }
+  };
+
+  // ── Add Device Modal ─────────────────────────────────────────────
+  window.openAddModal = () => {
+    document.getElementById('add-deviceId').value   = '';
+    document.getElementById('add-friendName').value = '';
+    document.getElementById('add-bankName').value = '';
+    document.getElementById('add-bankAccount').value = '';
+    document.getElementById('add-referral').value = '';
+    document.getElementById('add-notes').value      = '';
+    openModal('modal-add');
+  };
+
+  window.addDevice = async () => {
+    const deviceId    = document.getElementById('add-deviceId').value.trim();
+    const friendName  = document.getElementById('add-friendName').value.trim();
+    const bankName    = document.getElementById('add-bankName').value.trim();
+    const bankAccount = document.getElementById('add-bankAccount').value.trim();
+    const referral    = document.getElementById('add-referral').value.trim();
+    const notes       = document.getElementById('add-notes').value.trim();
+    if (!deviceId) {
+      showToast('Device ID is required.', 'error');
+      return;
+    }
+    if (!friendName) {
+      showToast('Friend Name is required before device first launch.', 'error');
+      return;
+    }
+    if (isDuplicateFriendName(friendName)) {
+      showToast('Friend Name already exists. Please choose a different name.', 'error');
+      return;
+    }
+    try {
+      await setDoc(doc(db, 'licenses', deviceId), {
+        deviceId, friendName, bankName, bankAccount, referral,
+        trialStart: new Date(), subscribed: false,
+        expiryDate: null, notes, lastSeen: null
+      });
+      showToast('✅ Device added!', 'success');
+      closeModal('modal-add');
+      loadUsers();
+    } catch (e) { showToast('Error: ' + e.message, 'error'); }
+  };
+
+  // ── Helpers ──────────────────────────────────────────────────────
+  window.openModal  = id => document.getElementById(id).classList.add('show');
+  window.closeModal = id => document.getElementById(id).classList.remove('show');
+
+  window.openReferralModal = async (deviceId) => {
+    try {
+      const referralData = await getReferralData(deviceId);
+      renderReferralModal(referralData);
+      openModal('modal-referral');
+    } catch (e) {
+      showToast('Error loading referrals: ' + e.message, 'error');
+    }
+  };
+
+  async function getReferralData(deviceId) {
+    const user = allUsers.find(u => u.id === deviceId);
+    if (!user) throw new Error('User not found');
+
+    const currentName = String(user.friendName || user.deviceId || '').trim();
+    const currentStatus = getStatusInfo(user);
+    const upline = getUpline(user, 2);
+    const { level1: downlineLevel1, level2: downlineLevel2 } = getDownline(user);
+
+    return {
+      user,
+      currentName,
+      currentStatus,
+      upline,
+      downlineLevel1,
+      downlineLevel2
+    };
+  }
+
+  function getUpline(user, maxLevel = 2) {
+    const result = [];
+    let currentReferral = normalizeFriendName(user.referral || '');
+    for (let level = 1; level <= maxLevel; level++) {
+      if (!currentReferral) break;
+      const found = allUsers.find(u => normalizeFriendName(u.friendName) === currentReferral);
+      if (!found) break;
+      result.push(found);
+      currentReferral = normalizeFriendName(found.referral || '');
+    }
+    return result;
+  }
+
+  function getDownline(user, maxLevel = 2) {
+    const sourceName = normalizeFriendName(user.friendName);
+    const level1 = allUsers.filter(u => normalizeFriendName(u.referral) === sourceName);
+    if (maxLevel < 2 || level1.length === 0) {
+      return { level1, level2: [] };
+    }
+
+    const level1Names = level1.map(u => normalizeFriendName(u.friendName)).filter(Boolean);
+    const level2 = allUsers.filter(u => level1Names.includes(normalizeFriendName(u.referral)));
+    return { level1, level2 };
+  }
+
+  window.saveAnnouncement = async () => {
+    const title = document.getElementById('announcement-title').value.trim();
+    const message = document.getElementById('announcement-message').value.trim();
+    const link = document.getElementById('announcement-link').value.trim();
+    const statusEl = document.getElementById('announcement-status');
+
+    if (!title && !message && !link) {
+      statusEl.textContent = 'Please enter at least a title, message, or link before saving.';
+      return;
+    }
+
+    try {
+      await setDoc(announcementDocRef, {
+        title,
+        message,
+        link: link || null,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+      statusEl.textContent = 'Announcement saved successfully.';
+      showToast('Announcement saved!', 'success');
+    } catch (err) {
+      statusEl.textContent = 'Failed to save announcement: ' + err.message;
+      showToast('Error saving announcement: ' + err.message, 'error');
+    }
+  };
+
+  async function loadAnnouncement() {
+    const statusEl = document.getElementById('announcement-status');
+    if (!statusEl) return;
+    statusEl.textContent = 'Loading announcement...';
+
+    try {
+      const snap = await getDoc(announcementDocRef);
+      if (!snap.exists()) {
+        document.getElementById('announcement-title').value = '';
+        document.getElementById('announcement-message').value = '';
+        document.getElementById('announcement-link').value = '';
+        statusEl.textContent = 'No announcement has been configured yet.';
         return;
       }
-      users.forEach(user => {
-        const row = document.createElement('div');
-        row.className = 'network-entry';
-        row.innerHTML = `
-          <div>
-            <strong>${escapeHtml(user.friendName)}</strong>
-            <span>${statusText(user.status)}</span>
-          </div>
-          ${statusBadge(user.status)}
-        `;
-        container.appendChild(row);
-      });
+      const data = snap.data();
+      document.getElementById('announcement-title').value = data.title || '';
+      document.getElementById('announcement-message').value = data.message || '';
+      document.getElementById('announcement-link').value = data.link || '';
+      statusEl.textContent = 'Loaded announcement from Firestore.';
+    } catch (err) {
+      statusEl.textContent = 'Unable to load announcement: ' + err.message;
+      showToast('Error loading announcement: ' + err.message, 'error');
     }
+  }
 
-    function statusText(status) {
-      const normalized = String(status || '').toLowerCase();
-      if (normalized === 'subscribed') return 'Subscribed';
-      if (normalized === 'trial') return 'Trial';
-      return 'Expired';
+  function getStatusInfo(user) {
+    const now = new Date();
+    const expiry = user.expiryDate?.toDate ? user.expiryDate.toDate() : user.expiryDate ? new Date(user.expiryDate) : null;
+    const trialStart = user.trialStart?.toDate ? user.trialStart.toDate() : user.trialStart ? new Date(user.trialStart) : null;
+
+    if (user.subscribed && expiry && expiry > now) {
+      return { label: 'Subscribed', badge: 'green' };
     }
-
-    function showMessage(text, isError = true) {
-      messageEl.textContent = text;
-      messageEl.style.display = text ? 'block' : 'none';
-      messageEl.style.borderColor = isError ? 'rgba(239,68,68,0.2)' : 'rgba(56,189,248,0.2)';
-      messageEl.style.color = isError ? '#FCA5A5' : '#7DD3FC';
-      messageEl.style.background = isError ? 'rgba(239,68,68,0.08)' : 'rgba(56,189,248,0.08)';
+    if (trialStart && (trialStart.getTime() + 3 * 86400000) > now.getTime()) {
+      return { label: 'Trial', badge: 'amber' };
     }
+    return { label: 'Expired', badge: 'red' };
+  }
 
-    function resetView() {
-      document.getElementById('summary-cards').style.display = 'none';
-      document.getElementById('network-view').style.display = 'none';
-      document.getElementById('upline-list').innerHTML = '';
-      document.getElementById('current-user-card').innerHTML = '';
-      document.getElementById('downline-1-section').innerHTML = '';
-      document.getElementById('downline-2-section').innerHTML = '';
-    }
+  function renderReferralModal(data) {
+    const uplineRows = [
+      { level: 2, user: data.upline[1] },
+      { level: 1, user: data.upline[0] }
+    ];
+    const downline1 = data.downlineLevel1 || [];
+    const downline2 = data.downlineLevel2 || [];
+    const totalDownline = downline1.length + downline2.length;
+    const estimatedIncome = downline1.length * 5000 + downline2.length * 2000;
 
-    function switchTab(tab) {
-      const networkContent = document.getElementById('network-content');
-      const updatesContent = document.getElementById('updates-content');
-      const networkTab = document.getElementById('tab-network');
-      const announcementsTab = document.getElementById('tab-announcements');
+    document.getElementById('referral-current-name').textContent = data.currentName;
+    document.getElementById('referral-up-line').innerHTML = uplineRows.map(row => {
+      if (!row.user) return '';
+      const status = getStatusInfo(row.user);
+      return `<div class="referral-item"><strong>Level ${row.level}</strong><span>${escHtml(row.user.friendName || row.user.deviceId)} <span class="referral-status ${status.badge}">${status.label}</span></span></div>`;
+    }).join('') || '<div class="referral-item"><strong>No upline found</strong><span>—</span></div>';
 
-      const showNetwork = tab === 'network';
-      networkContent.style.display = showNetwork ? 'block' : 'none';
-      updatesContent.style.display = showNetwork ? 'none' : 'block';
-      networkTab.classList.toggle('active', showNetwork);
-      announcementsTab.classList.toggle('active', !showNetwork);
-    }
+    document.getElementById('referral-downline-1').innerHTML = downline1.length > 0
+      ? downline1.map(user => {
+          const status = getStatusInfo(user);
+          return `<li><div class="item-meta"><span>↳ ${escHtml(user.friendName || user.deviceId)}</span></div><span class="referral-status ${status.badge}">${status.label}</span></li>`;
+        }).join('')
+      : '<li><span style="color:var(--muted)">No direct referrals</span></li>';
 
-    function toggleSection(sectionId) {
-      const section = document.getElementById(sectionId);
-      if (!section) return;
-      section.style.display = section.style.display === 'none' ? 'block' : 'none';
-    }
+    document.getElementById('referral-downline-2').innerHTML = downline2.length > 0
+      ? downline2.map(user => `<li><div class="item-meta"><span>↳ ${escHtml(user.friendName || user.deviceId)}</span></div></li>`).join('')
+      : '<li><span style="color:var(--muted)">No indirect referrals</span></li>';
 
-    function escapeHtml(value) {
-      return String(value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-    }
+    document.getElementById('referral-total-count').textContent = totalDownline;
+    document.getElementById('referral-income').textContent = `Rp ${estimatedIncome.toLocaleString('id-ID')}`;
+  }
 
-    input.addEventListener('keydown', event => {
-      if (event.key === 'Enter') {
-        loadBtn.click();
-      }
-    });
+  function toggleSection(sectionId) {
+    const element = document.getElementById(sectionId);
+    if (!element) return;
+    element.style.display = element.style.display === 'none' ? 'block' : 'none';
+  }
 
-    loadAnnouncement();
-  </script>
+  document.querySelectorAll('.modal-overlay').forEach(el => {
+    el.addEventListener('click', e => { if (e.target === el) el.classList.remove('show'); });
+  });
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  let toastTimer;
+  window.showToast = (msg, type = 'success') => {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = type;
+    el.style.display = 'block';
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { el.style.display = 'none'; }, 3500);
+  };
+</script>
 </body>
 </html>
