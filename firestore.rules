@@ -1,0 +1,70 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAuthorizedAdmin() {
+      return request.auth != null
+             && (
+               request.auth.uid == '5il2nYEfgwb6rknh7UBEfjYllDH3'
+               || request.auth.token.email == 'yendry.mikael@gmail.com'
+             );
+    }
+
+    match /licenses/{licenseId} {
+      allow read: if true;
+
+      function isReferralValid() {
+        return !request.resource.data.keys().hasAny(['referral'])
+               || request.resource.data.referral is string;
+      }
+
+      allow create: if isAuthorizedAdmin() || (
+          request.auth == null
+          && request.resource.data.deviceId == licenseId
+          && request.resource.data.friendName is string
+          && request.resource.data.subscribed is bool
+          && request.resource.data.notes is string
+          && request.resource.data.trialStart is timestamp
+          && (request.resource.data.expiryDate == null || request.resource.data.expiryDate is timestamp)
+          && request.resource.data.lastSeen is timestamp
+          && isReferralValid()
+          && request.resource.data.keys().hasOnly([
+               "deviceId", "friendName", "trialStart", "subscribed", "expiryDate", "notes", "lastSeen", "referral"
+             ])
+      );
+
+      function isAllowedAnonymousUpdate() {
+        return request.auth == null
+               && resource.data.deviceId == licenseId
+               && (
+                    (request.resource.data.diff(resource.data).changedKeys().hasOnly(["lastSeen"]) 
+                      && request.resource.data.lastSeen is timestamp)
+                 || (request.resource.data.diff(resource.data).changedKeys().hasOnly(["friendName"]) 
+                      && request.resource.data.friendName is string)
+                 || (request.resource.data.diff(resource.data).changedKeys().hasOnly(["referral"]) 
+                      && request.resource.data.referral is string)
+                 || (request.resource.data.diff(resource.data).changedKeys().hasOnly(["friendName", "lastSeen"]) 
+                      && request.resource.data.friendName is string
+                      && request.resource.data.lastSeen is timestamp)
+                 || (request.resource.data.diff(resource.data).changedKeys().hasOnly(["referral", "lastSeen"]) 
+                      && request.resource.data.referral is string
+                      && request.resource.data.lastSeen is timestamp)
+                 || (request.resource.data.diff(resource.data).changedKeys().hasOnly(["friendName", "referral"]) 
+                      && request.resource.data.friendName is string
+                      && request.resource.data.referral is string)
+                 || (request.resource.data.diff(resource.data).changedKeys().hasOnly(["friendName", "referral", "lastSeen"]) 
+                      && request.resource.data.friendName is string
+                      && request.resource.data.referral is string
+                      && request.resource.data.lastSeen is timestamp)
+               );
+      }
+
+      allow update: if isAuthorizedAdmin() || isAllowedAnonymousUpdate();
+
+      allow delete: if isAuthorizedAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
