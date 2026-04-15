@@ -585,6 +585,9 @@
         .replace(/>/g, '&gt;');
     }
 
+    window.switchTab = switchTab;
+    window.toggleSection = toggleSection;
+
     input.addEventListener('keydown', event => {
       if (event.key === 'Enter') {
         loadBtn.click();
@@ -595,4 +598,3 @@
   </script>
 </body>
 </html>
-
